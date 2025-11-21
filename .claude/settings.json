@@ -1,0 +1,80 @@
+{
+  "⚠️ CRITICAL_PRIORITY_RULES": {
+    "1_PORT_MANAGEMENT": {
+      "priority": "HIGHEST - CHECK THIS FIRST EVERY SESSION",
+      "rule": "NEVER use individual npm run dev commands - ALWAYS use the unified start-dev.sh script",
+      "why": "Individual commands cause port conflicts, lingering processes, and consumed tokens on restarts",
+      "correct_procedure": [
+        "1️⃣  Check if services running: lsof -i :3000,:3001,:8000 2>/dev/null | grep LISTEN",
+        "2️⃣  If YES: killall -9 node npm python3 && sleep 3",
+        "3️⃣  ALWAYS use this: ./start-dev.sh (or ./scripts/start-dev.sh)",
+        "4️⃣  WAIT for output: 'All Services Started Successfully! 🚀'",
+        "5️⃣  FRONTEND ALWAYS ON PORT 3000 - script now ensures this with explicit -p 3000 flag",
+        "6️⃣  VERIFY with: lsof -i :3000-3010 2>/dev/null | grep LISTEN | awk '{print $9}' | sort -u"
+      ],
+      "correct_links_from_script_output": {
+        "backend": "ALWAYS http://localhost:3001 (never changes)",
+        "apiBase": "ALWAYS http://localhost:3001/api/v1 (never changes)",
+        "frontend": "ALWAYS http://localhost:3000 (now locked with -p 3000 flag)",
+        "ai_pipeline": "http://localhost:8000 (if using AI features)"
+      },
+      "WRONG_APPROACH_DO_NOT_USE": [
+        "❌ cd backend && npm run dev &  (causes port 3001 conflicts)",
+        "❌ cd frontend && npm run dev & (causes port conflicts, wrong ports)",
+        "❌ Killing individual processes (leaves others running)",
+        "❌ Assuming frontend auto-increments (it now locks to 3000)"
+      ]
+    },
+    "1b_FRONTEND_PORT_LOCKING": {
+      "priority": "CRITICAL - Frontend MUST ALWAYS be on port 3000",
+      "rule": "Frontend is locked to port 3000 with explicit -p 3000 flag. Never let it auto-increment to 3003, 3005, 5000, etc.",
+      "why": "Frontend on inconsistent ports breaks API integration, causes confusion, wastes tokens on port debugging",
+      "implementation": [
+        "✅ start-dev.sh now clears port 3000 FIRST before starting frontend",
+        "✅ start-dev.sh passes explicit '-p 3000' flag to 'npm run dev'",
+        "✅ frontend/package.json updated: 'dev': 'next dev -p 3000'",
+        "✅ If port 3000 still in use: run 'lsof -ti :3000 | xargs kill -9' before start-dev.sh"
+      ],
+      "what_this_means": {
+        "frontend_url": "ALWAYS http://localhost:3000",
+        "backend_url": "ALWAYS http://localhost:3001",
+        "if_3000_occupied": "Kill the process: lsof -ti :3000 | xargs kill -9 && sleep 2 && ./start-dev.sh"
+      }
+    },
+    "2_PROMPT_REFINEMENT": {
+      "priority": "HIGHEST - DO THIS BEFORE ANY WORK",
+      "steps": [
+        "1. STOP - Do NOT start coding immediately",
+        "2. Read this settings.json file (especially PORT_MANAGEMENT rule above)",
+        "3. Check PROJECT_CONTEXT.md for related Known Issues & Fixes",
+        "4. Apply template from PROMPT_TEMPLATES.md",
+        "5. Show structured prompt to user with context references",
+        "6. Ask for confirmation before proceeding"
+      ]
+    }
+  },
+  "workflowRules": {
+    "mandatory": [
+      "⚠️ READ CRITICAL_PRIORITY_RULES.PORT_MANAGEMENT FIRST",
+      "Apply Prompt Refinement Layer (see this file, then PROJECT_CONTEXT.md)",
+      "After ANY code change: Use ./start-dev.sh, detect actual ports, provide correct links"
+    ]
+  },
+  "beforeAnyCode": "Show user structured prompt with context and ask for confirmation",
+  "afterAnyCodeChange": {
+    "CRITICAL": "Use ./start-dev.sh script - NEVER individual npm commands",
+    "step1": "Check if services running: lsof -i :3000,:3001,:8000 2>/dev/null | grep LISTEN",
+    "step2": "If running: killall -9 node npm python3 2>/dev/null && sleep 3",
+    "step3": "RUN UNIFIED SCRIPT: ./start-dev.sh (wait for '✅ All Services Started Successfully! 🚀')",
+    "step4": "DETECT actual ports: lsof -i :3000-3010 2>/dev/null | grep LISTEN | awk '{print $9}' | sort -u",
+    "step5": "Provide correct localhost links based on actual script output (check Next.js port - may be 3000, 3003, 3005+)",
+    "links": {
+      "backend": "http://localhost:3001 (ALWAYS this)",
+      "apiBase": "http://localhost:3001/api/v1 (ALWAYS this)",
+      "frontend": "http://localhost:[PORT] - GET PORT FROM SCRIPT OUTPUT",
+      "health": "http://localhost:3001/health",
+      "note": "Do NOT assume frontend is 3002 or 3003 - check actual script output"
+    },
+    "verification": "Show user the actual ports from script output + lsof command so they know for certain"
+  }
+}

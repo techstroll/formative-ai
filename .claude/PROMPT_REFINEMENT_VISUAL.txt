@@ -1,0 +1,151 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    PROMPT REFINEMENT LAYER - VISUAL WORKFLOW                    ║
+║                         (MUST FOLLOW EVERY TIME)                                ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+USER SENDS MESSAGE
+        ↓
+
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 1: STOP - Do NOT code immediately                         │
+│         Take 30 seconds to check context                       │
+└─────────────────────────────────────────────────────────────────┘
+        ↓
+
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 2: READ CRITICAL RULES (in order)                         │
+│                                                                 │
+│  1️⃣  .claude/settings.json                                     │
+│       → CRITICAL_PRIORITY_RULES section                        │
+│                                                                 │
+│  2️⃣  .claude/PROJECT_CONTEXT.md                               │
+│       → Rule #0: PORT_MANAGEMENT                               │
+│       → Related Rules (2, 3, 4)                                │
+│                                                                 │
+│  3️⃣  Task-Specific Checklist                                   │
+│       → If involves servers → PORT_MANAGEMENT_CHECKLIST.md     │
+│       → If database schema → DATABASE_SCHEMA_FIXES.md          │
+│       → If CORS issues → Check app.ts:39-64 in context        │
+│                                                                 │
+│  4️⃣  .claude/PROMPT_TEMPLATES.md                              │
+│       → Apply template for task type                           │
+└─────────────────────────────────────────────────────────────────┘
+        ↓
+
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 3: CATEGORIZE TASK                                        │
+│                                                                 │
+│  Bug Fix        → Template 1 + Known Issues section           │
+│  Feature        → Template 2 + Architecture section           │
+│  Testing        → Template 3 + TESTING_GUIDE.md              │
+│  Server Work    → PORT_MANAGEMENT_CHECKLIST.md               │
+│  Refactoring    → Template 6 + Code review guidelines        │
+│  Quick Task     → Template 5 (minimal)                        │
+└─────────────────────────────────────────────────────────────────┘
+        ↓
+
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 4: BUILD STRUCTURED PROMPT                                │
+│                                                                 │
+│  Show user:                                                     │
+│  ✓ Task type being applied                                     │
+│  ✓ Template references                                         │
+│  ✓ Context references from PROJECT_CONTEXT.md                │
+│  ✓ Files that will be modified                                │
+│  ✓ Expected outcome                                            │
+│  ✓ Critical rules that apply                                   │
+│                                                                 │
+│  Example:                                                       │
+│  "Applying Prompt Refinement Layer...                          │
+│   Task: Bug Fix (Template 1)                                   │
+│   Context: Known Issue #2 (PROJECT_CONTEXT.md:164-167)        │
+│   Files: backend/src/app.ts (lines 39-64)                    │
+│   Rule: Rule #0 PORT_MANAGEMENT (if restarting)              │
+│   Approach: Check CORS → Fix → Restart with ./start-dev.sh  │
+│   Is this correct?"                                            │
+└─────────────────────────────────────────────────────────────────┘
+        ↓
+
+┌─────────────────────────────────────────────────────────────────┐
+│ STEP 5: ASK FOR CONFIRMATION                                   │
+│                                                                 │
+│  "Is this analysis correct? Should I proceed?"                │
+│                                                                 │
+│  Wait for user response                                        │
+└─────────────────────────────────────────────────────────────────┘
+        ↓
+
+    User confirms?
+        ↙    ↘
+      NO    YES
+      ↓      ↓
+   Edit    STEP 6: EXECUTE
+           ↓
+    Follow the structured plan
+    Check CRITICAL_PRIORITY_RULES during execution
+    If PORT_MANAGEMENT needed:
+      • ./start-dev.sh (not individual npm commands)
+      • Detect actual ports with lsof
+      • Provide correct links from script output
+           ↓
+    STEP 7: REPORT RESULTS
+           ↓
+    Provide output + actual localhost links
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+⚠️  KEY RULES THAT OVERRIDE EVERYTHING:
+
+  1. PORT MANAGEMENT (Rule #0)
+     └─ Use ./start-dev.sh ONLY (never individual npm commands)
+     └─ Verify ports with lsof command
+     └─ Provide links from script output, not guessed
+
+  2. SERVER RESTART (Rule #2)
+     └─ After any code change → ./start-dev.sh
+     └─ Wait for "All Services Started Successfully! 🚀"
+     └─ Detect actual ports before providing links
+
+  3. CRITICAL RULES THAT OVERRIDE TEMPLATES
+     └─ If task touches CORS → Check app.ts:39-64
+     └─ If task touches data models → Add defaults
+     └─ If task touches async → Add error handling
+
+═════════════════════════════════════════════════════════════════════════════════
+
+TIME IMPACT:
+
+⏱️  With Prompt Refinement Layer:
+    - Planning: 2 minutes
+    - Execution: 3 minutes
+    - Total: 5 minutes
+    ✅ First time correct
+
+❌  Without Prompt Refinement Layer:
+    - Start coding: 0 minutes
+    - Hit port conflict: 5 minutes
+    - Restart servers (wrong way): 10 minutes
+    - Restart again (right way): 10 minutes
+    - Provide wrong links: 2 minutes
+    - Debug confusion: 5 minutes
+    - Total: 32 minutes
+    ❌ Multiple restarts, wrong links
+
+SAVINGS: 27 minutes per task + 80 fewer tokens = Follow this system!
+
+═════════════════════════════════════════════════════════════════════════════════
+
+✅ VERIFICATION CHECKLIST (Before executing any task):
+
+  [ ] Read settings.json CRITICAL_PRIORITY_RULES?
+  [ ] Read PROJECT_CONTEXT.md Rule #0?
+  [ ] Read task-specific checklist (if applicable)?
+  [ ] Built structured prompt?
+  [ ] Showed plan to user?
+  [ ] Got confirmation?
+  [ ] Know which template applies?
+  [ ] Know which files to modify?
+  [ ] Know critical rules that apply?
+
+If ANY is unchecked → STOP and complete before proceeding!
